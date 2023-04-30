@@ -1,6 +1,18 @@
 import styles from './Accordion.module.css';
+import { useEffect, useState } from 'react';
 
 export default function Accordion() {
+    const [active, setActive] = useState<number | null>(null);
+    const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
+
+    useEffect(() => {
+        function handleResize() {
+            setScreenWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const questionsAnswers = [
         {
@@ -25,21 +37,48 @@ export default function Accordion() {
         }
     ];
 
+    const handleClick = (index: number) => {
+        if (index === active) {
+            setActive(null);
+        } else {
+            setActive(index);
+        }
+
+    };
+
     return (
         <div className={styles["container"]}>
             <div className={styles["images"]}>
-                <img className={styles["woman-computer"]} src="/illustration-woman-online-desktop.svg" alt="woman-computer" />
-                <img className={styles["illustration-box"]} src="/illustration-box-desktop.svg" alt="illustration-box" />
+                {screenWidth < 1100 ?
+                    <>
+                        <img className={styles["woman-computer-mobile"]} src="/illustration-woman-online-mobile.svg" alt="woman-computer" />
+                    </>
+                    :
+                    <>
+                        <img className={styles["woman-computer"]} src="/illustration-woman-online-desktop.svg" alt="woman-computer" />
+                        <img className={styles["illustration-box"]} src="/illustration-box-desktop.svg" alt="illustration-box" />
+                    </>
+                }
             </div>
 
             <div className={styles["accordion"]}>
                 <h1>FAQ</h1>
 
-                {questionsAnswers.map(({ question, answer }) => {
-                    return <div className={styles["question-answer"]}>
-                        <button>{question}</button>
-                        <img className={styles["arrow"]} src="/icon-arrow-down.svg" alt="arrow" />
-                        <p>{answer}</p>
+                {questionsAnswers.map(({ question, answer }, index) => {
+                    return <div key={index} className={styles["question-answer"]}>
+                        {active === index ?
+                            <>
+                                <button className={styles["active"]} onClick={() => handleClick(index)}>{question}</button>
+                                <img className={`${styles["arrow"]} ${styles["active"]}`} src="/icon-arrow-down.svg" alt="arrow" />
+                                <p className={styles["active"]}>{answer}</p>
+                            </>
+                            :
+                            <>
+                                <button onClick={() => handleClick(index)}>{question}</button>
+                                <img className={styles["arrow"]} src="/icon-arrow-down.svg" alt="arrow" />
+                                <p>{answer}</p>
+                            </>
+                        }
                     </div>;
                 })}
             </div>
